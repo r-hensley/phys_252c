@@ -204,7 +204,6 @@ def problem_4():
         def __init__(self):
             self.citizen_counter = 1
             self.citizens: List[Citizen] = []
-            self.marriage_pool = []
             self.want_children = []
             self.birth_record = {}
 
@@ -219,11 +218,12 @@ def problem_4():
                 self.gender = "Female"
                 self.male = False
                 self.female = True
+                community.want_children.append(self)
             else:
                 self.gender = "Male"
                 self.male = True
                 self.female = False
-            community.birth_record.setdefault(year, [self]).append(self)
+            community.birth_record.setdefault(year, []).append(self)
             self.birthyear = year
             self.partner = None
             self.marriage_year = None
@@ -233,57 +233,18 @@ def problem_4():
             age = year - self.birthyear
             return age
 
-    def get_citizen(citizen_id):
-        for citizen in community.citizens:
-            if citizen.citizen_id == citizen_id:
-                return citizen
-
-    def get_married(citizen):
-        for potential_match in community.marriage_pool:
-            if citizen == potential_match:
-                continue  # apparently getting married to yourself is called "sologamy"
-            if citizen.gender == potential_match.gender:
-                continue  # I'm sorry we don't allow same-gender marriage either
-            community.marriage_pool.remove(citizen)
-            community.marriage_pool.remove(potential_match)
-            citizen.partner = potential_match
-            potential_match.partner = citizen
-            citizen.marriage_year = potential_match.marriage_year = year
-            if citizen.female:
-                community.want_children.append(citizen)
-            else:
-                community.want_children.append(potential_match)
-            # print(citizen.age(), potential_match.age())
-            # print(f"[{year}] Citizens {citizen.citizen_id} and {potential_match.citizen_id} got married!")
-            return
-
     def have_a_child(community, citizen):
-        if year - citizen.marriage_year < 1:
-            return  # Slow down a bit! Wait at least a year to have a child
+        if citizen.age() < 20:
+            return  # You're way too young!
         new_baby = Citizen(community)
         if new_baby.male:
-            community.want_children.remove(citizen)
-        community.citizens.append(new_baby)
+            community.want_children.remove(citizen)  # Ok you're done
         citizen.children.append(new_baby)
-        citizen.partner.children.append(new_baby)
-        # print(f"[{year}] A new baby {'boy' if new_baby.male else 'girl'} was born! Please welcome "
-        #       f"citizen number {new_baby.citizen_id} to the community! "
-        #       f"--> {[j.gender for j in citizen.children]}")
-
-    def permanently_retire_from_life(community, citizen):
-        # print(citizen.age())
-        if citizen.age() == 80:  # At the age of 80 they permanently retire from the community (and life in general)
-            # print(citizen.age() == 80)
-            # print(year, citizen.birthyear, citizen.age())
-            # print(year)
-            community.citizens.remove(citizen)
-            # print('dead')
-            # print(f"[{year}] Citizen number {citizen.citizen_id} has permanently retired from the community.")
 
     print("Generating population")
     # Start off with 100 citizens
     for i in range(100):
-        community.citizens.append(Citizen(community))
+        Citizen(community)
     initial_males = sum(i.male for i in community.citizens)
     initial_females = sum(i.female for i in community.citizens)
     print(f"Suddenly in the year zero, {initial_males} males and {initial_females} females popped into existence!")
@@ -291,34 +252,39 @@ def problem_4():
         print("Oh no! Your population is very lopsided and has only males or females. It has no chance of survival.")
         return
 
-    year = 18
+    def get_living_population():
+        total_population = []
+        for y in range(year - 80, year + 1):
+            total_population += community.birth_record.get(y, [])
+        return total_population
+
+    year = 20  # nothing will happen for first 20 years
     while True:
-        for citizen in community.birth_record.get(year-20, []):
-            community.marriage_pool.append(citizen)
-        for citizen in community.marriage_pool:
-            get_married(citizen)
         for citizen in community.want_children:
             have_a_child(community, citizen)
-        for citizen in community.birth_record.get(year-80, []):
-            # print(citizen)
-            permanently_retire_from_life(community, citizen)
-        if not community.citizens:
+        living_population: list = get_living_population()  # a list of currently living population
+        if not living_population:
             break
-        number_of_females = sum(i.female for i in community.citizens)
-        number_of_males = sum(i.male for i in community.citizens)
-        gender_ratio_log.append(round(number_of_females / (number_of_males + number_of_females), 4))
-        population_log.append(number_of_males + number_of_females)
+        number_of_females = sum(i.female for i in living_population)
+        gender_ratio_log.append(round(number_of_females / len(living_population), 4))
+        population_log.append(len(get_living_population()))
         year += 1
         if year % 100 == 0:
             print(f"Year {year-1} --> Year {year}    {population_log[-1]} ({gender_ratio_log[-1]})")
-    for citizen in community.citizens:
-        print(citizen.age())
 
 
+# problem_4()
 
+"""Results
+After many generations, the percentage of the community that is female tends 
+to whatever the percentage chance of a female birth is. In this problem, a 52% 
+chance of giving birth to a girl means that over time the population becomes 52% 
+female.
 
-problem_4()
-
+Additionally, because of the condition that birthing stops after a female gives 
+birth to a male, in a world where you only give birth to females a low percent 
+of the time like 10%, communities die off very quickly as the number of people 
+available to give birth quickly decreases to zero."""
 
 
 
