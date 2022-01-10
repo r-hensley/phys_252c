@@ -14,6 +14,7 @@ from itertools import product
 
 
 def problem_2_method_1():
+    """Brute force method for specifically our problem, but four for loops is messy"""
     unordered_combinations = []
     ordered_combinations = []
     all_ordered_combinations = []
@@ -37,6 +38,7 @@ def problem_2_method_1():
 
 
 def problem_2_method_2():
+    """More dynamic method using itertools.product() generate result for any number of dice"""
     unordered_combinations = []
     ordered_combinations = []
     all_ordered_combinations = []
@@ -211,33 +213,42 @@ def problem_4():
 
     class Citizen:
         def __init__(self, community):
-            self.citizen_id = community.citizen_counter
+            self.citizen_id = community.citizen_counter  # We don't use names here
             community.citizens.append(self)
             community.citizen_counter += 1
             if random.random() <= chance_of_girl:
                 self.gender = "Female"
                 self.male = False
                 self.female = True
+                # ALl women are added to a "want children" list until they give birth to a boy
                 community.want_children.append(self)
             else:
                 self.gender = "Male"
                 self.male = True
                 self.female = False
+
+            # There's a birth record dictionary that keeps track of when people are born
+            # It is used to calculate the number of living population at any time by summing all the lists in the
+            # last 80 years of the dictionary
             community.birth_record.setdefault(year, []).append(self)
-            self.birthyear = year
-            self.partner = None
-            self.marriage_year = None
-            self.children = []
+            self.birthyear = year  # Used to calculate age
+            self.children = []  # Female will stop giving birth when last element of this list is a male
 
         def age(self):
             age = year - self.birthyear
             return age
 
+    def get_living_population():
+        total_population = []
+        for y in range(year - 80, year + 1):  # Last 80 years
+            total_population += community.birth_record.get(y, [])
+        return total_population
+
     def have_a_child(community, citizen):
         if citizen.age() < 20:
             return  # You're way too young!
         new_baby = Citizen(community)
-        if new_baby.male:
+        if new_baby.male:  # The woman gave birth to a boy
             community.want_children.remove(citizen)  # Ok you're done
         citizen.children.append(new_baby)
 
@@ -250,21 +261,18 @@ def problem_4():
     print(f"Suddenly in the year zero, {initial_males} males and {initial_females} females popped into existence!")
     if not initial_males or not initial_females:
         print("Oh no! Your population is very lopsided and has only males or females. It has no chance of survival.")
+        print("Try again with another community.")
         return
-
-    def get_living_population():
-        total_population = []
-        for y in range(year - 80, year + 1):
-            total_population += community.birth_record.get(y, [])
-        return total_population
 
     year = 20  # nothing will happen for first 20 years
     while True:
         for citizen in community.want_children:
             have_a_child(community, citizen)
+        # People in this community do nothing but make babies or otherwise wait around until they turn 80.
+
         living_population: list = get_living_population()  # a list of currently living population
         if not living_population:
-            break
+            break  # Your community has all died
         number_of_females = sum(i.female for i in living_population)
         gender_ratio_log.append(round(number_of_females / len(living_population), 4))
         population_log.append(len(get_living_population()))
