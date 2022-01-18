@@ -1,7 +1,7 @@
 import time
 from typing import Union, List
-
 import numpy as np
+import matplotlib.pyplot as plt
 import random
 from itertools import product
 
@@ -104,10 +104,11 @@ def problem_3_method_1():
     possible_jet_combinations = []  # will be a list of lists indexed by how many b-jets
 
     for number_of_b_jets in possible_number_of_b_jets:
-        if number_of_b_jets == 0:
-            print(f"For the case with zero b-jets, the only option is to have all four jets be ordinary quark jets.")
-            possible_jet_combinations.append([[False, False, False, False]])
+        if number_of_b_jets == 2:
+            print(f"For the case with two confirmed b-jets, "
+                  f"there's no combinatorics to do. The b-jets are the two jets that were tagged.")
         elif number_of_b_jets == 1:
+
             one_jet_combinations_list = []
             for jet in list(range(4)):
                 combination = [True if i == jet else False for i in list(range(4))]
@@ -197,9 +198,10 @@ Possible combinations for 2 jets:
 
 def problem_4():
     year = 0  # I don't know how far we are required to go with the realism here but I'll have some fun
-    end_of_the_world = 1000  # This is the year the world will end.
-    gender_ratio_log = []  # Gender ratio per year
-    population_log = []  # Population count per year
+    end_of_the_world = 2500  # This is the year the world will end.
+    initial_population = 100
+    gender_ratio_log = np.array([])  # Gender ratio per year
+    population_log = np.array([], dtype=np.int64)  # Population count per year
     chance_of_girl = 0.52
 
     class Community:
@@ -254,7 +256,7 @@ def problem_4():
 
     print("Generating population")
     # Start off with 100 citizens
-    for i in range(100):
+    for i in range(initial_population):
         Citizen(community)
     initial_males = sum(i.male for i in community.citizens)
     initial_females = sum(i.female for i in community.citizens)
@@ -264,21 +266,36 @@ def problem_4():
         print("Try again with another community.")
         return
 
-    year = 20  # nothing will happen for first 20 years
-    while True:
+    # year = 20  # nothing will happen for first 20 years
+    living_population: list = get_living_population()  # a list of currently living population
+    while len(living_population) < 1e6:
         for citizen in community.want_children:
             have_a_child(community, citizen)
         # People in this community do nothing but make babies or otherwise wait around until they turn 80.
 
-        living_population: list = get_living_population()  # a list of currently living population
+        living_population = get_living_population()  # a list of currently living population
         if not living_population:
             break  # Your community has all died
         number_of_females = sum(i.female for i in living_population)
-        gender_ratio_log.append(round(number_of_females / len(living_population), 4))
-        population_log.append(len(get_living_population()))
+        gender_ratio_log = np.append(gender_ratio_log, round(number_of_females / len(living_population), 4))
+        population_log = np.append(population_log, len(get_living_population()))
         year += 1
         if year % 100 == 0:
             print(f"Year {year-1} --> Year {year}    {population_log[-1]} ({gender_ratio_log[-1]})")
+
+    years = np.arange(1, year+1)
+
+    fig, axs = plt.subplots(2)
+    axs[0].plot(years, population_log)
+    axs[0].set(xlabel="Year", ylabel="Population", title="Community population per year")
+
+    axs[1].plot(years, gender_ratio_log)
+    axs[1].set(xlabel="Year", ylabel="Percent female", title="Percent female of the community")
+
+    for ax in axs:
+        ax.label_outer()
+
+    plt.show()
 
 
 # problem_4()
