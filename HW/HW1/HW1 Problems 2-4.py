@@ -199,7 +199,7 @@ Possible combinations for 2 jets:
 def problem_4():
     year = 0  # I don't know how far we are required to go with the realism here but I'll have some fun
     end_of_the_world = 2500  # This is the year the world will end.
-    initial_population = 100
+    initial_population = 1000
     gender_ratio_log = np.array([])  # Gender ratio per year
     population_log = np.array([], dtype=np.int64)  # Population count per year
     chance_of_girl = 0.52
@@ -268,7 +268,7 @@ def problem_4():
 
     # year = 20  # nothing will happen for first 20 years
     living_population: list = get_living_population()  # a list of currently living population
-    while len(living_population) < 1e6:
+    while len(living_population) < 5e5:
         for citizen in community.want_children:
             have_a_child(community, citizen)
         # People in this community do nothing but make babies or otherwise wait around until they turn 80.
@@ -282,6 +282,14 @@ def problem_4():
         year += 1
         if year % 100 == 0:
             print(f"Year {year-1} --> Year {year}    {population_log[-1]} ({gender_ratio_log[-1]})")
+
+    num = 0
+    total_children = 0
+    for i in community.citizens:
+        if i.female:
+            total_children += len(i.children)
+            num += 1
+    print(f"Average number of children per parent: {total_children/num}")
 
     years = np.arange(1, year+1)
 
@@ -298,7 +306,7 @@ def problem_4():
     plt.show()
 
 
-# problem_4()
+problem_4()
 
 """Results
 After many generations, the percentage of the community that is female tends 
