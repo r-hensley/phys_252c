@@ -50,7 +50,7 @@ for _ in range(100000):
     data = [random.gauss(mu, sigma) for _ in range(20)]
 
     sigma1 = np.sqrt(sum([(i - mu)**2 for i in data])/len(data))
-    sigma2 = np.sqrt(sum([(i - mu)**2 for i in data])/(len(data)-1))
+    sigma2 = np.sqrt(sum([(i - mu)**2 for i in data])/(len(data)-1))  # this is the correct one
 
     sigma1_data = np.append(sigma1_data, sigma1)
     sigma2_data = np.append(sigma2_data, sigma2)
