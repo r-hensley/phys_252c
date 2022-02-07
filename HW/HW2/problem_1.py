@@ -2,6 +2,13 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 
+# Which formula gives an unbiased estimate of the population variance of a distribu-
+# tion?  You might demonstrate this numerically, with a little simulation, for a gaussian dis-
+# tribution.  To see the bias clearly, you need to use a value of N~20.
+#
+#     sigma1 = np.sqrt(sum([(i - mu)**2 for i in data])/len(data))
+#     sigma2 = np.sqrt(sum([(i - mu)**2 for i in data])/(len(data)-1))
+
 
 def gaus(x, mu, sigma):
     return np.exp(-((x-mu)**2)/(2*sigma**2))/(sigma*np.sqrt(2 * np.pi))
