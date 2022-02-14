@@ -15,6 +15,8 @@ import numpy as np
 # the sum of the background and signal, and will be Poisson-distributed.
 
 ROOT2PI = 2.50662827463
+MU = 700
+SIGMA = 50
 
 
 def gint(mu, sigma, xlow, xhigh):
@@ -44,12 +46,14 @@ data = [float(i) for i in data]
 print(min(data), max(data))
 fig, ax = plt.subplots()
 
-n, bins, patches = ax.hist(data, 100, (100, 1000))
+n, bins, patches = ax.hist(data, 36, (100, 1000), label="Resonance data")
+bin_width = bins[1] - bins[0]
 max_bin = np.where(n == max(n))[0][0]
-max_bin = find_bin(bins, 700)[0]
+max_bin = find_bin(bins, MU)[0]
 print(f"{max_bin=}")
 print(f"{n[max_bin]=}, {bins[max_bin]=}")
-ax.axvline(700, color="#000000")
+print(f"{bin_width=}")
+ax.axvline(MU, color="#000000")
 
 # Estimate background using first 40% of bins
 x = bins[int(len(n)*4/10)] - bins[0]
@@ -57,7 +61,7 @@ background = sum(n[0:int(len(n)*4/10)]) / x
 # background = 10
 print(f"{background=}")
 
-print(f"{find_bin(bins, 700)=}")
+print(f"{find_bin(bins, MU)=}")
 
 cut_results = []
 
@@ -68,7 +72,7 @@ for peak_bin in [max_bin]:  # len(bins) = 101, range is 0 --> 100
         for upper_cut in range(peak_bin, len(bins)):  # ranges from 0 --> 100
             if lower_cut == upper_cut == peak_bin:
                 continue
-            efficiency = gint(700, 50, bins[lower_cut], bins[upper_cut]) / 1
+            efficiency = gint(MU, SIGMA, bins[lower_cut], bins[upper_cut]) / 1
             x = bins[upper_cut] - bins[lower_cut]  # width of mass window
             n_obs = sum(n[lower_cut:upper_cut])  # number of events in that window
             estimator = (n_obs - background * x) / (luminosity * efficiency)
@@ -83,7 +87,18 @@ for peak_bin in [max_bin]:  # len(bins) = 101, range is 0 --> 100
 cut_results.sort(key=lambda i: i[4], reverse=False)
 print(cut_results[0:10], sep="\n")
 
-# plt.show()
+ax.set_title("Fitting resonance data by minimizing error")
+ax.set_xlabel("Mass (GeV)")
+ax.set_ylabel("Events per 25 GeV")
+
+# Plot the fit
+x = np.linspace(100, 1000, 37)  # 100, 125, 150, ..., 950, 975, 1000
+y = np.zeros(37)
+
+for i, x_i in enumerate(n):
+    y[i] = 10*bin_width + cut_results[0][3]*gint(MU, SIGMA, bins[i], bins[i+1])
+ax.plot(x, y, "r+", label="Minimized error fit")
+ax.legend()
 
 # variable peak location, dynamic background counting 10.077 / GeV:
 # [(55, 55, 75, 900.2081499972741, 56.11166095491515), (55, 55, 76, 921.5834837734922, 56.21871004606231),
@@ -120,11 +135,13 @@ ideal_low_bin = cut_results[0][1]
 ideal_high_bin = cut_results[0][2]
 ideal_low_mass = bins[ideal_low_bin]
 ideal_high_mass = bins[ideal_high_bin]
+ax.axvline(ideal_low_mass, color="#FF0000")
+ax.axvline(ideal_high_mass, color="#FF0000")
 
 print(f"Ideal cutoffs are from {ideal_low_mass} (bin {ideal_low_bin}) to {ideal_high_mass} (bin {ideal_high_bin})")
-# Ideal cutoffs are from 622.0 (bin 58) to 775.0 (bin 75)
+# Ideal cutoffs are from 625.0 (bin 21) to 775.0 (bin 27)
 
 print(f"The estimator here is {cut_results[0][3]} and sigma is {cut_results[0][4]}")
-# The estimator here is 893.8833856753009 and sigma is 55.156770831209144
+# The estimator here is 883.1287030866033 and sigma is 55.160668614936334
 
-
+plt.show()
