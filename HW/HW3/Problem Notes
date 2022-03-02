@@ -1,0 +1,33 @@
+# 1
+
+Central confidence interval
+Integrate from 0 until you have 15%, then integrate from the right until you have 15%, and the remainder will be 68.27%
+mu_i = b + s G_i  
+-ln L = sum n_i ln(mu_i) - mu_i
+
+P(s) = L(s) / int(100 to 1000) L(s') ds'
+
+Look at lecture 13 slide 2: bayesian multisource spectra: recap with all the beta = 0
+
+
+
+
+# 2
+
+Window -> Use ideal bin window from HW 2
+Take log to make it possible
+Don't forget about efficiency 
+
+Likelihood will be just some falling curve maxed at 0, integrate it out to 95% for the confidence interval
+Don't worry about efficiency for part (b), integrate gaussian for each bin
+
+
+
+
+# 3
+
+
+0 1 2 3 4 5 6 7 8 9 10
+0 2 4 6 8 10
+6: 6/dx
+
