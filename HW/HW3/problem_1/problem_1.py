@@ -26,9 +26,9 @@ def gint(mu, sigma, xlow, xhigh):
 
 
 def log_likelihood(_n, _bins, _s):
+    # print(f"{_s=}")
     log_likelihood_sum = 0
     for bin_number, bin_value in enumerate(_n):
-        # print(f"{_s=}")
         # print(f"{_bins[bin_number]=}")
         # print(f"{_bins[bin_number+1]=}")
         # print(f"{bin_number=}")
@@ -57,21 +57,38 @@ fig, ax = plt.subplots()
 
 n, bins, patches = ax.hist(data, 36, (100, 1000), label="Resonance data")
 
-precision = 0.1
-max_s = 1000
+precision = 5
+max_s = 5000
 number_of_bins = int(max_s/precision + 1)
 likelihood_list = np.zeros((2, number_of_bins))
+base_likelihood = 0
 for i, s in enumerate(np.linspace(0, max_s, number_of_bins)):
     # print(s)
     likelihood_list[0][i] = s
-    likelihood_list[1][i] = log_likelihood(n, bins, s)
+    next_likelihood = log_likelihood(n, bins, s)
+    if s == 0:
+        base_likelihood = next_likelihood
+    if next_likelihood - base_likelihood < 0:
+        break
+    likelihood_list[1][i] = next_likelihood - base_likelihood
 
-max_likelihood = np.where(likelihood_list[1] == max(likelihood_list[1]))[0][0]
-print(f"{max_likelihood=}")
+likelihood_list = np.array([
+    np.trim_zeros(likelihood_list[0]),
+    np.trim_zeros(likelihood_list[1])
+])
+
+# print(f"{likelihood_list[0]=}")
+# print(f"{likelihood_list[1]=}")
+
+# print(f"{max(likelihood_list[1])=}")
+max_likelihood = np.where(likelihood_list[1] == max(likelihood_list[1]))
+# print(f"{max_likelihood=}")
+
 
 print("Likelihoods")
 for i, j in enumerate(likelihood_list[0]):
-    print(f"{likelihood_list[0][i]}: {likelihood_list[1][i]}")
+    # print(f"{likelihood_list[0][i]}: {likelihood_list[1][i]}")
+    pass
 
 print(f"Bin 92:\n{likelihood_list[0][92]}: {likelihood_list[1][92]}")
 
