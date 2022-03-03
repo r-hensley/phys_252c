@@ -36,6 +36,7 @@ def logstir(n):
 
     return logfact
 
+
 def find_bin(_bins, _x):
     for bin_number, bin_cutoff in enumerate(_bins):
         if _x <= bin_cutoff:
@@ -45,7 +46,7 @@ def find_bin(_bins, _x):
 luminosity = 1
 
 # with open("../Data/resonance.dat", "r") as f:
-with open("../Data/resonance-nosig.dat", "r") as f:
+with open("../../Data/resonance-nosig.dat", "r") as f:
     data = f.read().replace(' ', '').splitlines()
 
 data = [float(i) for i in data]
@@ -55,13 +56,17 @@ fig, ax = plt.subplots()
 
 n, bins, patches = ax.hist(data, 36, (100, 1000), label="Resonance data")
 bin_width = bins[1] - bins[0]
-print(f"{max(n)=}")
-max_bin = np.where(n == max(n))[0][0]
-print(f"{max_bin=}")
+# print(f"{max(n)=}")
+# max_bin = np.where(n == max(n))[0][0]
+# print(f"{max_bin=}")
 max_bin = find_bin(bins, MU)[0]
 print(f"{max_bin=}")
 print(f"{n[max_bin]=}, {bins[max_bin]=}")
 print(f"{bin_width=}")
+
+lower_window = find_bin(bins, 625)[0]
+upper_window = find_bin(bins, 775)[0]
+print(f"{lower_window=}, {upper_window=}")
 
 # Estimate background using first 40% of bins
 x = bins[int(len(n)*4/10)] - bins[0]
@@ -76,7 +81,9 @@ cut_results = []
 # Consider all possible mass windows across the entire spectrum
 # for peak_bin in [max_bin]:  range(0, len(bins))
 for peak_bin in [max_bin]:  # len(bins) = 101, range is 0 --> 100
+    # for lower_cut in [lower_window]:
     for lower_cut in range(peak_bin + 1):  # ranges from 0 --> 100
+        # for upper_cut in [upper_window]:
         for upper_cut in range(peak_bin, len(bins)):  # ranges from 0 --> 100
             if lower_cut == upper_cut == peak_bin:
                 continue
@@ -84,8 +91,10 @@ for peak_bin in [max_bin]:  # len(bins) = 101, range is 0 --> 100
             x = bins[upper_cut] - bins[lower_cut]  # width of mass window
             n_obs = sum(n[lower_cut:upper_cut])  # number of events in that window
             estimator = (n_obs - background * x) / (luminosity * efficiency)
+            print(f"{n_obs=}, {background*x=}, {estimator=}")
             if not estimator > 0:
-                continue
+                # continue
+                pass  # Using window from last homework, I get a negative estimator (-96.788)
             variance_square = (estimator * efficiency + background * x) / (luminosity * efficiency)**2
             variance = np.sqrt(variance_square)
             if variance == 0:
@@ -121,15 +130,15 @@ print(f"Ideal cutoffs are from {ideal_low_mass} (bin {ideal_low_bin}) to {ideal_
 # Ideal cutoffs are from 625.0 (bin 21) to 775.0 (bin 27)
 
 print(f"The estimator here is {cut_results[0][3]} and sigma is {cut_results[0][4]}")
-# The estimator here is 883.1287030866033 and sigma is 55.160668614936334
+# The estimator here is -96.78800386703442 and sigma is 43.72274524860117
 
-expected_events = cut_results[0][3] * gint(MU, SIGMA, 100, 1000)
-expected_background = background * (1000 - 100)
-total_expected = expected_background + expected_events
-total_observed = int(sum(n))
-print(f"{expected_events=}")
+# expected_events = cut_results[0][3] * gint(MU, SIGMA, 625, 775)
+expected_background = background * (775 - 625)
+# total_expected = expected_background + expected_events
+total_observed = int(sum(n[22:27]))
+# print(f"{expected_events=}")
 print(f"{expected_background=}")
-print(f"{total_expected=}")
+# print(f"{total_expected=}")
 print(f"{total_observed=}")
 
 # [(24, 23, 29, 0.20847112903551113, 56.87518802323297), (24, 23, 30, 7.24509340517004, 61.082625845655144), (24, 23, 31, 8.473363572684633, 65.1966057804159), (24, 24, 28, 17.660643217157975, 66.95228697540132), (24, 24, 29, 37.03124736432202, 72.56695891378263), (24, 24, 30, 46.41096816268778, 78.74914377902306), (24, 24, 31, 48.02232781124245, 84.79790688816014), (24, 24, 32, 35.71654554121121, 90.404835057835), (24, 24, 33, 3.4285946854855043, 95.4993388835851)]
@@ -140,10 +149,19 @@ print(f"{total_observed=}")
 # total_expected=9113.351328271698
 # total_observed=9010
 
+# Using window from last homework:
+# n_obs=1435.0, background*x=1518.857142857143, estimator=-96.78800386703442
+# [(24, 21, 27, -96.78800386703442, 43.72274524860117)]
+# Ideal cutoffs are from 625.0 (bin 21) to 775.0 (bin 27)
+# The estimator here is -96.78800386703442 and sigma is 43.72274524860117
+# expected_events=-96.78800377620165
+# expected_background=9113.142857142857
+# total_expected=9016.354853366654
+# total_observed=9010
+
 ratio = 1
 expected_events = 0
 while ratio > 0.05 and expected_events < 10000:
-    expected_events += 1
     total_expected = expected_background + expected_events
     numerator = 0
     denominator = 0
@@ -157,6 +175,7 @@ while ratio > 0.05 and expected_events < 10000:
         denominator += denominator_addition
     ratio = round(numerator / denominator, 5)
     print(f"{expected_events=}: {numerator=}/{denominator=} = {ratio=}")
+    expected_events += 1
 
 # expected_events=1: numerator=0.13875115302771854/denominator=0.14107724324797827 = ratio=0.98351
 # expected_events=2: numerator=0.13645149038745277/denominator=0.14107724324797827 = ratio=0.96721
@@ -165,5 +184,20 @@ while ratio > 0.05 and expected_events < 10000:
 # expected_events=5: numerator=0.12971050543319604/denominator=0.14107724324797827 = ratio=0.91943
 # expected_events=132: numerator=0.007162003251685104/denominator=0.14107724324797827 = ratio=0.05077
 # expected_events=133: numerator=0.006958680522552051/denominator=0.14107724324797827 = ratio=0.04933
+
+# Using window from last homework (22 - 27)
+# expected_events=130: numerator=0.007584473971751966/denominator=0.14107724324797827 = ratio=0.05376
+# expected_events=131: numerator=0.007370563611455755/denominator=0.14107724324797827 = ratio=0.05224
+# expected_events=132: numerator=0.007162003251685104/denominator=0.14107724324797827 = ratio=0.05077
+# expected_events=133: numerator=0.006958680522552051/denominator=0.14107724324797827 = ratio=0.04933
+
+
+# Obs / back = (1500, 1500) --> exp. events < 78
+
+# Obs / back = (1206, 1518) --> exp. events < 15
+# expected_events=15: numerator=1.95341493771351e-18/denominator=4.716756711383502e-17 = ratio=0.04141
+
+
+
 
 plt.show()

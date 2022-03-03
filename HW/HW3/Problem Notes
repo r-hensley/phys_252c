@@ -26,6 +26,12 @@ Don't worry about efficiency for part (b), integrate gaussian for each bin
 
 # 3
 
+Obs. k succ, n trials
+P(k; n) = n! / k! (n-k)! epsilon^k (1-epsilon)^(n-k)
+
+P(ep) = P(k;n) / int(0 to 1) P(k;n) d(ep)
+Don't need priors because we just use uniform and it'll cancel
+Just need to integrate the above
 
 0 1 2 3 4 5 6 7 8 9 10
 0 2 4 6 8 10
