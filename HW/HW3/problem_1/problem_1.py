@@ -60,39 +60,39 @@ n, bins, patches = ax.hist(data, 36, (100, 1000), label="Resonance data")
 precision = 5
 max_s = 5000
 number_of_bins = int(max_s/precision + 1)
-likelihood_list = np.zeros((2, number_of_bins))
+likelihood_list_x = np.array([])
+likelihood_list_y = np.array([])
 base_likelihood = 0
 for i, s in enumerate(np.linspace(0, max_s, number_of_bins)):
-    # print(s)
-    likelihood_list[0][i] = s
     next_likelihood = log_likelihood(n, bins, s)
     if s == 0:
         base_likelihood = next_likelihood
     if next_likelihood - base_likelihood < 0:
         break
-    likelihood_list[1][i] = next_likelihood - base_likelihood
+    likelihood_list_x = np.append(likelihood_list_x, s)
+    likelihood_list_y = np.append(likelihood_list_y, next_likelihood - base_likelihood)
 
-likelihood_list = np.array([
-    np.trim_zeros(likelihood_list[0]),
-    np.trim_zeros(likelihood_list[1])
-])
-
-# print(f"{likelihood_list[0]=}")
-# print(f"{likelihood_list[1]=}")
+# print(f"{likelihood_list_x=}")
+# print(f"{likelihood_list_y=}")
 
 # print(f"{max(likelihood_list[1])=}")
-max_likelihood = np.where(likelihood_list[1] == max(likelihood_list[1]))
-# print(f"{max_likelihood=}")
+max_bin = np.where(likelihood_list_y == max(likelihood_list_y))[0][0]
+print(f"{max_bin=}")
 
 
 print("Likelihoods")
-for i, j in enumerate(likelihood_list[0]):
-    # print(f"{likelihood_list[0][i]}: {likelihood_list[1][i]}")
+for i, j in enumerate(likelihood_list_x):
+    # print(f"{likelihood_list_x[i]}: {likelihood_list_y[i]}")
     pass
 
-print(f"Bin 92:\n{likelihood_list[0][92]}: {likelihood_list[1][92]}")
+print(f"Bin {max_bin}:\n{likelihood_list_x[max_bin]}: {likelihood_list_y[max_bin]}")
 
 fig2, ax2 = plt.subplots()
-ax2.plot(likelihood_list[0], likelihood_list[1])
+ax2.plot(likelihood_list_x, likelihood_list_y)
+
+# max_bin=184
+# Likelihoods
+# Bin 184:
+# 920.0: 197.54595161386533
 
 plt.show()
