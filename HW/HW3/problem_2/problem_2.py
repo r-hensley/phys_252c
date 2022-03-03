@@ -135,7 +135,7 @@ print(f"The estimator here is {cut_results[0][3]} and sigma is {cut_results[0][4
 # expected_events = cut_results[0][3] * gint(MU, SIGMA, 625, 775)
 expected_background = background * (775 - 625)
 # total_expected = expected_background + expected_events
-total_observed = int(sum(n[22:27]))
+total_observed = int(sum(n[21:27]))
 # print(f"{expected_events=}")
 print(f"{expected_background=}")
 # print(f"{total_expected=}")
@@ -151,13 +151,11 @@ print(f"{total_observed=}")
 
 # Using window from last homework:
 # n_obs=1435.0, background*x=1518.857142857143, estimator=-96.78800386703442
-# [(24, 21, 27, -96.78800386703442, 43.72274524860117)]
+# [(24, 21, 27, -96.78800386703442, 43.72274524860117), (24, 21, 26, -119.70100923502395, 44.21810853646901), (24, 22, 27, -77.09556527001547, 44.83578822817332), (24, 20, 27, -113.12986353633337, 44.871254012681), (24, 22, 26, -100.44188347570352, 45.00467685975994), (24, 21, 28, -59.31080224234952, 45.525174411666946), (24, 20, 26, -136.643153617521, 45.82170060071054), (24, 20, 28, -76.62836474847535, 46.28684116894763), (24, 22, 28, -36.47307676380832, 47.13803814124568), (24, 19, 27, -78.90284307248014, 47.66072429004762)]
 # Ideal cutoffs are from 625.0 (bin 21) to 775.0 (bin 27)
 # The estimator here is -96.78800386703442 and sigma is 43.72274524860117
-# expected_events=-96.78800377620165
-# expected_background=9113.142857142857
-# total_expected=9016.354853366654
-# total_observed=9010
+# expected_background=1518.857142857143
+# total_observed=1435
 
 ratio = 1
 expected_events = 0
@@ -197,7 +195,8 @@ while ratio > 0.05 and expected_events < 10000:
 # Obs / back = (1206, 1518) --> exp. events < 15
 # expected_events=15: numerator=1.95341493771351e-18/denominator=4.716756711383502e-17 = ratio=0.04141
 
-
+# Obs / back = (1435, 1518) --> exp. events < 41
+# expected_events=41: numerator=0.0007170667907593477/denominator=0.015597420758386849 = ratio=0.04597
 
 
 plt.show()
