@@ -35,11 +35,11 @@ def log_likelihood(_n, _bins, _s):
         # print(f"{_bins[bin_number+1]=}")
         # print(f"{bin_number=}")
         # print(f"{bin_value=}")
-        mu = 10 * BIN_WIDTH + _s * gint(MU, SIGMA, _bins[bin_number], _bins[bin_number+1])
+        mu = 251.188 + _s * gint(MU, SIGMA, _bins[bin_number], _bins[bin_number+1])
         # print(f"{mu=}")
         # print("")
         log_likelihood_sum += mu - bin_value * np.log(mu)
-    return -log_likelihood_sum
+    return 2*log_likelihood_sum
 
 
 def integrate_likelihood(_x, _y, _low_x, _high_x):
@@ -60,11 +60,12 @@ def find_bound(_x, _y, backwards=False):  # 15.865
         _y = np.flip(_y)
     for i, y in enumerate(_y):
         int_sum += dx * y
-        if int_sum > 0.15865:
+        print(int_sum)
+        if int_sum < -0.15865:
             return _x[i]
 
 
-with open("../Data/resonance.dat", "r") as f:
+with open("../../Data/resonance.dat", "r") as f:
     data = f.read().replace(' ', '').splitlines()
 
 data = [float(i) for i in data]
@@ -72,7 +73,7 @@ fig, ax = plt.subplots()
 
 n, bins, patches = ax.hist(data, 36, (100, 1000), label="Resonance data")
 
-precision = 0.1
+precision = 5
 max_s = 2500
 number_of_bins = int(max_s/precision + 1)
 likelihood_list_x = np.array([])
@@ -82,7 +83,8 @@ for i, s in enumerate(np.linspace(0, max_s, number_of_bins)):
     next_likelihood = log_likelihood(n, bins, s)
     if s == 0:
         base_likelihood = next_likelihood
-    if next_likelihood - base_likelihood < 0:
+    print(f"{s=}, {base_likelihood=}, {next_likelihood=}")
+    if next_likelihood - base_likelihood > 0:
         break
     likelihood_list_x = np.append(likelihood_list_x, s)
     likelihood_list_y = np.append(likelihood_list_y, next_likelihood - base_likelihood)
@@ -97,7 +99,7 @@ print(f"{lower_bound=} --- {upper_bound=}")
 # print(f"{likelihood_list_y=}")
 
 # print(f"{max(likelihood_list[1])=}")
-max_bin = np.where(likelihood_list_y == max(likelihood_list_y))[0][0]
+max_bin = np.where(likelihood_list_y == min(likelihood_list_y))[0][0]
 print(f"{max_bin=}")
 
 
@@ -120,7 +122,8 @@ ax2.fill_between(likelihood_list_x,
                  likelihood_list_y,
                  where=(lower_bound < likelihood_list_x) & (likelihood_list_x < upper_bound),
                  alpha=0.5)
-plt.xlim(686, 1150)
+# plt.xlim(686, 1150)
+plt.xlim(0, 2000)
 ax2.text(0.05, 0.95, f"Lower bound: {lower_bound}\nUpper bound: {upper_bound}",
          transform=ax2.transAxes, fontsize=12, verticalalignment="top")
 # Lower bound: 866, Upper bound: 972.7
@@ -130,11 +133,11 @@ max_s = likelihood_list_x[max_bin]
 ax2.text(0.60, 0.95, rf"Estimator: ${max_s}^{{+{round(upper_bound-max_s, 1)}}}_{{-{round(max_s-lower_bound, 1)}}}$",
          transform=ax2.transAxes, fontsize=12, verticalalignment="top")
 # 918.2 + 54.5 - 52.2
-_, top = plt.ylim()
-bottom = 0
-plt.ylim(bottom=bottom)
-y_percentage = (likelihood_list_y[max_bin] - bottom) / (top - bottom)
-ax2.axvline(max_s, 0, y_percentage, color="#FF0000")
+bottom, _ = plt.ylim()
+top = 0
+plt.ylim(top=top)
+y_percentage = (likelihood_list_y[max_bin] - top) / (top - bottom)
+ax2.axvline(max_s, 1-y_percentage, 1, color="#FF0000")
 
 
 # lower_bound=866.0 --- upper_bound=972.7
