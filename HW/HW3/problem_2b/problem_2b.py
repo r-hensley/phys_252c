@@ -30,7 +30,7 @@ def gint(mu, sigma, xlow, xhigh):
 def calc_log_likelihood(_n, _bins, _s):
     log_likelihood_sum = 0
     for bin_number, bin_value in enumerate(_n):
-        mu = 251.188 + _s * gint(MU, SIGMA, _bins[bin_number], _bins[bin_number+1])
+        mu = 10 * BIN_WIDTH + _s * gint(MU, SIGMA, _bins[bin_number], _bins[bin_number+1])
         log_likelihood_sum += bin_value * np.log(mu) - mu
     return log_likelihood_sum
 
@@ -60,7 +60,7 @@ with open("../../Data/resonance-nosig.dat", "r") as f:
 data = [float(i) for i in data]
 fig, ax = plt.subplots()
 
-n, bins, patches = ax.hist(data, 36, (100, 1000), label="Resonance data")
+n, bins, patches = ax.hist(data, (1000-100)/BIN_WIDTH, (100, 1000), label="Resonance data")
 
 precision = 0.1  # Iterate over values of s to max_s with precision
 max_s = 100
