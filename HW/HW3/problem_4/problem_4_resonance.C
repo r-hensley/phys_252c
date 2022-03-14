@@ -37,29 +37,28 @@ double gint(double xlo, double xhi, double mu, double sig)
 void fcn(int &npar, double *grad, double &fcnval, double *xval, int iflag)
 {
 
-  // link to histogram
+    // link to histogram
 
-  TH1F *h1f = (TH1F*)gDirectory->Get("h1f");
+    TH1F *h1f = (TH1F*)gDirectory->Get("h1f");
 
-  // calculate -lnL
+    // calculate -lnL
 
-  double fsum = 0.0;
-  
-  for(int i=0; i<=nbinsx; i++)
-    {
-      if (h1f->GetBinContent(i) == 0.) {/*printf("Got zero! (%d)\n", i);*/ continue;};
-      double xlo = static_cast<float>(i-1) * 20.0;
-      double xhi = xlo + 20.0;
+    double fsum = 0.0;
 
-      double mu  = xval[1]*20. + xval[0]*gint(xlo,xhi,xval[2],50);
+    for(int i=0; i<=nbinsx; i++) {
+        if (h1f ->GetBinContent(i) == 0.) {continue;};
 
-      double y = h1f->GetBinContent(i);
+        double xlo = static_cast<float>(i-1) * 20.0;
+        double xhi = xlo + 20.0;
 
-      fsum = fsum - (y*log(mu)-mu);   
+        double mu  = xval[1]*20. + xval[0]*gint(xlo,xhi,xval[2],50);
 
+        double y = h1f->GetBinContent(i);
+
+        fsum = fsum - (y*log(mu)-mu);
     }
 
-  fcnval = 2.0 * fsum ;
+    fcnval = 2.0 * fsum ;
 
 }
 
@@ -68,7 +67,7 @@ void minres_original()
 
     // initialize histogram with data
 
-    auto h1f = new TH1F("h1f", "Resonance data",nbinsx,0,1000);
+    auto h1f = new TH1F("Resonance Histogram", "Resonance data", nbinsx, 0, 1000);
 
     ifstream res_data;
     res_data.open("../../Data/resonance.dat");
@@ -81,7 +80,7 @@ void minres_original()
     }
 
     double bin_content;
-    for (int i=0; i<=nbinsx+5; i++) {
+    for (int i=0; i<=nbinsx; i++) {
         bin_content = h1f -> GetBinContent(i);
         printf("%d) %f\n", i, bin_content);
     };
@@ -136,7 +135,7 @@ void minres_original()
 }
 
 
-// 0) 0.000000
+//0) 0.000000
 //1) 0.000000
 //2) 0.000000
 //3) 0.000000
@@ -192,74 +191,74 @@ void minres_original()
 //53) 1.000000
 //54) 1.000000
 //55) 1.000000
-// **********
-// **    1 **SET ERR           1
-// **********
-// PARAMETER DEFINITIONS:
-//    NO.   NAME         VALUE      STEP SIZE      LIMITS
-//     1 s            1.00000e+03  1.00000e+01     no limits
-//     2 b            1.00000e+01  1.00000e+00     no limits
-//     3 mu           5.00000e+02  5.00000e+00     no limits
-// **********
-// **    1 **SIMPLEX
-// **********
-// FIRST CALL TO USER FUNCTION AT NEW START POINT, WITH IFLAG=4.
-// START SIMPLEX MINIMIZATION.    CONVERGENCE WHEN EDM .LT. 0.1
-// FCN=-88290.3 FROM SIMPLEX   STATUS=PROGRESS       14 CALLS          15 TOTAL
-//                     EDM=720.687    STRATEGY= 1      NO ERROR MATRIX
-//  EXT PARAMETER               CURRENT GUESS      PHYSICAL LIMITS
-//  NO.   NAME      VALUE            ERROR       NEGATIVE      POSITIVE
-//   1  s            5.16000e+02   1.00000e+01
-//   2  b            1.10000e+01   1.00000e+00
-//   3  mu           7.00000e+02   5.00000e+00
-// SIMPLEX MINIMIZATION HAS CONVERGED.
-// FCN=-88365.6 FROM SIMPLEX   STATUS=PROGRESS       67 CALLS          68 TOTAL
-//                     EDM=0.0437065    STRATEGY= 1      NO ERROR MATRIX
-//  EXT PARAMETER               CURRENT GUESS      PHYSICAL LIMITS
-//  NO.   NAME      VALUE            ERROR       NEGATIVE      POSITIVE
-//   1  s            9.15740e+02   1.00000e+01
-//   2  b            1.00940e+01   1.00000e+00
-//   3  mu           7.05531e+02   5.00000e+00
-// **********
-// **    2 **MIGRAD
-// **********
-// START MIGRAD MINIMIZATION.  STRATEGY  1.  CONVERGENCE WHEN EDM .LT. 1.00e-04
-// FCN=-88365.6 FROM MIGRAD    STATUS=INITIATE       10 CALLS          78 TOTAL
-//                     EDM= unknown      STRATEGY= 1      NO ERROR MATRIX
-//  EXT PARAMETER               CURRENT GUESS       STEP         FIRST
-//  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
-//   1  s            9.15740e+02   1.00000e+01   9.29791e+00   4.71189e-04
-//   2  b            1.00940e+01   1.00000e+00   2.89471e-02   2.20501e-01
-//   3  mu           7.05531e+02   5.00000e+00   1.17141e+00   2.30481e-02
-// MIGRAD MINIMIZATION HAS CONVERGED.
-// MIGRAD WILL VERIFY CONVERGENCE AND ERROR MATRIX.
-// COVARIANCE MATRIX CALCULATED SUCCESSFULLY
-// FCN=-88365.6 FROM MIGRAD    STATUS=CONVERGED      45 CALLS         113 TOTAL
-//                     EDM=7.20792e-07    STRATEGY= 1      ERROR MATRIX ACCURATE
-//  EXT PARAMETER                                   STEP         FIRST
-//  NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
-//   1  s            9.15232e+02   5.80051e+01   7.74396e+00   4.03346e-06
-//   2  b            1.00931e+01   1.19268e-01   1.59243e-02  -5.01499e-03
-//   3  mu           7.05336e+02   4.08849e+00   5.93464e-01  -2.35198e-04
-// EXTERNAL ERROR MATRIX.    NDIM=  25    NPAR=  3    ERR DEF=1
-//  3.365e+03 -2.713e+00  1.187e+00
-// -2.713e+00  1.422e-02 -1.312e-03
-//  1.187e+00 -1.312e-03  1.672e+01
-// PARAMETER  CORRELATION COEFFICIENTS
-//       NO.  GLOBAL      1      2      3
-//        1  0.39216   1.000 -0.392  0.005
-//        2  0.39214  -0.392  1.000 -0.003
-//        3  0.00507   0.005 -0.003  1.000
-// **********
-// **    3 **MINOS
-// **********
-// FCN=-88365.6 FROM MINOS     STATUS=SUCCESSFUL     70 CALLS         183 TOTAL
-//                     EDM=7.20792e-07    STRATEGY= 1      ERROR MATRIX ACCURATE
-//  EXT PARAMETER                  PARABOLIC         MINOS ERRORS
-//  NO.   NAME      VALUE            ERROR      NEGATIVE      POSITIVE
-//   1  s            9.15232e+02   5.80051e+01  -5.77292e+01   5.83618e+01
-//   2  b            1.00931e+01   1.19268e-01  -1.18857e-01   1.19839e-01
-//   3  mu           7.05336e+02   4.08849e+00  -4.08959e+00   4.09305e+00
-// 915.232 58.0051
-// 10.09310.119268
-// 705.336 4.08849
+//**********
+//**    1 **SET ERR           1
+//**********
+//PARAMETER DEFINITIONS:
+//   NO.   NAME         VALUE      STEP SIZE      LIMITS
+//    1 s            1.00000e+03  1.00000e+01     no limits
+//    2 b            1.00000e+01  1.00000e+00     no limits
+//    3 mu           5.00000e+02  5.00000e+00     no limits
+//**********
+//**    1 **SIMPLEX
+//**********
+//FIRST CALL TO USER FUNCTION AT NEW START POINT, WITH IFLAG=4.
+//START SIMPLEX MINIMIZATION.    CONVERGENCE WHEN EDM .LT. 0.1
+//FCN=-88290.3 FROM SIMPLEX   STATUS=PROGRESS       14 CALLS          15 TOTAL
+//                    EDM=720.687    STRATEGY= 1      NO ERROR MATRIX
+// EXT PARAMETER               CURRENT GUESS      PHYSICAL LIMITS
+// NO.   NAME      VALUE            ERROR       NEGATIVE      POSITIVE
+//  1  s            5.16000e+02   1.00000e+01
+//  2  b            1.10000e+01   1.00000e+00
+//  3  mu           7.00000e+02   5.00000e+00
+//SIMPLEX MINIMIZATION HAS CONVERGED.
+//FCN=-88365.6 FROM SIMPLEX   STATUS=PROGRESS       67 CALLS          68 TOTAL
+//                    EDM=0.0437065    STRATEGY= 1      NO ERROR MATRIX
+// EXT PARAMETER               CURRENT GUESS      PHYSICAL LIMITS
+// NO.   NAME      VALUE            ERROR       NEGATIVE      POSITIVE
+//  1  s            9.15740e+02   1.00000e+01
+//  2  b            1.00940e+01   1.00000e+00
+//  3  mu           7.05531e+02   5.00000e+00
+//**********
+//**    2 **MIGRAD
+//**********
+//START MIGRAD MINIMIZATION.  STRATEGY  1.  CONVERGENCE WHEN EDM .LT. 1.00e-04
+//FCN=-88365.6 FROM MIGRAD    STATUS=INITIATE       10 CALLS          78 TOTAL
+//                    EDM= unknown      STRATEGY= 1      NO ERROR MATRIX
+// EXT PARAMETER               CURRENT GUESS       STEP         FIRST
+// NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
+//  1  s            9.15740e+02   1.00000e+01   9.29791e+00   4.71189e-04
+//  2  b            1.00940e+01   1.00000e+00   2.89471e-02   2.20501e-01
+//  3  mu           7.05531e+02   5.00000e+00   1.17141e+00   2.30481e-02
+//MIGRAD MINIMIZATION HAS CONVERGED.
+//MIGRAD WILL VERIFY CONVERGENCE AND ERROR MATRIX.
+//COVARIANCE MATRIX CALCULATED SUCCESSFULLY
+//FCN=-88365.6 FROM MIGRAD    STATUS=CONVERGED      45 CALLS         113 TOTAL
+//                    EDM=7.20792e-07    STRATEGY= 1      ERROR MATRIX ACCURATE
+// EXT PARAMETER                                   STEP         FIRST
+// NO.   NAME      VALUE            ERROR          SIZE      DERIVATIVE
+//  1  s            9.15232e+02   5.80051e+01   7.74396e+00   4.03346e-06
+//  2  b            1.00931e+01   1.19268e-01   1.59243e-02  -5.01499e-03
+//  3  mu           7.05336e+02   4.08849e+00   5.93464e-01  -2.35198e-04
+//EXTERNAL ERROR MATRIX.    NDIM=  25    NPAR=  3    ERR DEF=1
+// 3.365e+03 -2.713e+00  1.187e+00
+//-2.713e+00  1.422e-02 -1.312e-03
+// 1.187e+00 -1.312e-03  1.672e+01
+//PARAMETER  CORRELATION COEFFICIENTS
+//      NO.  GLOBAL      1      2      3
+//       1  0.39216   1.000 -0.392  0.005
+//       2  0.39214  -0.392  1.000 -0.003
+//       3  0.00507   0.005 -0.003  1.000
+//**********
+//**    3 **MINOS
+//**********
+//FCN=-88365.6 FROM MINOS     STATUS=SUCCESSFUL     70 CALLS         183 TOTAL
+//                    EDM=7.20792e-07    STRATEGY= 1      ERROR MATRIX ACCURATE
+// EXT PARAMETER                  PARABOLIC         MINOS ERRORS
+// NO.   NAME      VALUE            ERROR      NEGATIVE      POSITIVE
+//  1  s            9.15232e+02   5.80051e+01  -5.77292e+01   5.83618e+01
+//  2  b            1.00931e+01   1.19268e-01  -1.18857e-01   1.19839e-01
+//  3  mu           7.05336e+02   4.08849e+00  -4.08959e+00   4.09305e+00
+//915.232 58.0051
+//10.09310.119268
+//705.336 4.08849
